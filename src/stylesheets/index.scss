@@ -12,7 +12,47 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html, body {
+  height: 100vh;
+  background-color: #778ca3;
+}
+
+.Wordle {
+  height: 100vh;
+  padding: 1rem;
+  text-align: center;
+}
+
+.Wordle p {
+  color: #d1d8e0;
+  font-size: 1.5em;
+}
+
+.wordle-input {
+  color: #4b6584;
+  margin: 1em;
+  text-align: center;
+  padding: 0.5em 0.5em;
+}
+
+button {
+  background-color: #d1d8e0;
+  color: #4b6584;
+  text-align: center;
+  border: 1px solid #4b6584;
+  border-radius: 0.25em;
+  padding: 0.5em 0.75em;
+}
+
+.wordle-grid-row {
+  display: block;
+}
+
+.wordle-letter-box {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  margin: 5px;
+  color: black;
 }
