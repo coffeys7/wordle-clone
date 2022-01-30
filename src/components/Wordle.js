@@ -226,7 +226,7 @@ class Wordle extends React.Component {
                     <>
                       <p className="text">Woot!</p>
                       <p>
-                       <img src={success} width="300" />
+                       <img src={success} alt="Success" width="300" />
                       </p>
                       <button onClick={this.onClickRestart}>Play Again</button>
                     </>
@@ -235,7 +235,7 @@ class Wordle extends React.Component {
                     <>
                       <p className="text">Uh oh! You suck!</p>
                       <p>
-                       <img src={fail} width="300" />
+                       <img src={fail} alt="Fail" width="300" />
                       </p>
                       <p className="text">The word was <strong style={{ textTransform: 'uppercase' }}>{this.state.inputWord}</strong></p>
                       <button onClick={this.onClickRestart}>Play Again</button>
