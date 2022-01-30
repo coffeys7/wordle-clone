@@ -85,6 +85,13 @@ a {
       }
     }
   }
+  .wordle-letter-box {
+    &.empty {
+      .box-container {
+        color: transparent;
+      }
+    }
+  }
 }
 
 .wordle-letter-box {

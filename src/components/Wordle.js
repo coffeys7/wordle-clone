@@ -156,21 +156,17 @@ class Wordle extends React.Component {
   }
 
   classNameForBox(i, j) {
-    if (this.state.currentWordCount <= i) return '';
-
     let currentLetter = get(this.state.words, `[${i}][${j}]`, null);
-    if (isNil(currentLetter)) {
-      return '';
-    } else {
-      if (includes(this.state.inputWord, currentLetter)) {
-        if (this.state.inputWord[j] === currentLetter) {
-          return 'exact';
-        } else {
-          return 'in-word';
-        }
+    if (isNil(currentLetter)) return 'empty';
+
+    if (includes(this.state.inputWord, currentLetter)) {
+      if (this.state.inputWord[j] === currentLetter) {
+        return 'exact';
       } else {
-        return 'missing';
+        return 'in-word';
       }
+    } else {
+      return 'missing';
     }
   }
 
@@ -183,7 +179,7 @@ class Wordle extends React.Component {
               return (
                 <div className={`wordle-letter-box ${this.classNameForBox(i, j)}`} key={`box-${j}`}>
                   <div className="box-container">
-                    {(this.state.words[i] || [])[j] || ''}
+                    {(this.state.words[i] || [])[j] || 'x'}
                   </div>
                 </div>
               );
@@ -215,7 +211,6 @@ class Wordle extends React.Component {
         )}
         {this.state.isStarted && (
           <div>
-            <p className="text" style={{marginBottom: '1rem'}}>We have begun</p>
             <p>
               <a href="#!" onClick={this.onClickRestart}>Restart</a>
             </p>
@@ -234,7 +229,7 @@ class Wordle extends React.Component {
                   {!this.isCurrentWordCorrect() && (
                     <>
                       <p className="text">Uh oh! You suck!</p>
-                      <p className="text">The word was <strong>{this.state.inputWord}</strong></p>
+                      <p className="text">The word was <strong style={{ textTransform: 'uppercase' }}>{this.state.inputWord}</strong></p>
                       <button onClick={this.onClickRestart}>Play Again</button>
                     </>
                   )}
