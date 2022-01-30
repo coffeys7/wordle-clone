@@ -1,8 +1,8 @@
 import React from 'react';
 import Word from '@utilities/Word';
+import WordleGrid from '@components/wordle_grid/WordleGrid';
+import Summary from '@components/Summary';
 import { get, isNil } from 'lodash'
-import success from '@images/success.gif';
-import fail from '@images/fail.gif';
 class Wordle extends React.Component {
   constructor(props) {
     super(props);
@@ -216,19 +216,17 @@ class Wordle extends React.Component {
   createGrid() {
     return Array(6).fill(null).map((_, i) => {
       return (
-        <div className={`wordle-grid-row ${this.classNameForRow(i)}`} key={`row-${i}`}>
+        <WordleGrid.Row className={this.classNameForRow(i)} key={`row-${i}`}>
           {
             Array(this.getWordSize()).fill(null).map((_, j) => {
               return (
-                <div className={`wordle-letter-box ${this.classNameForBox(i, j)}`} key={`box-${j}`}>
-                  <div className="box-container">
-                    {(this.state.words[i] || [])[j] || 'x'}
-                  </div>
-                </div>
+                <WordleGrid.Cell className={this.classNameForBox(i, j)} key={`box-${j}`}>
+                  {get(this.state.words, `[${i}][${j}]`, 'x')}
+                </WordleGrid.Cell>
               );
             })
           }
-        </div>
+        </WordleGrid.Row>
       );
     });
   }
@@ -257,32 +255,16 @@ class Wordle extends React.Component {
             <p>
               <a href="#!" onClick={this.onClickRestart}>Restart</a>
             </p>
-            <div className="wordle-grid">
+            <WordleGrid.Grid>
               {this.createGrid()}
-            </div>
+            </WordleGrid.Grid>
             <>
               {this.state.isCompleted && (
-                <div className="summary">
-                  {this.isCurrentWordCorrect() && (
-                    <>
-                      <p className="text">Woot!</p>
-                      <p>
-                       <img src={success} alt="Success" width="300" />
-                      </p>
-                      <button onClick={this.onClickRestart}>Play Again</button>
-                    </>
-                  )}
-                  {!this.isCurrentWordCorrect() && (
-                    <>
-                      <p className="text">Uh oh! You suck!</p>
-                      <p>
-                       <img src={fail} alt="Fail" width="300" />
-                      </p>
-                      <p className="text">The word was <strong style={{ textTransform: 'uppercase' }}>{this.state.inputWord}</strong></p>
-                      <button onClick={this.onClickRestart}>Play Again</button>
-                    </>
-                  )}
-                </div>
+                <Summary
+                  isSuccess={this.isCurrentWordCorrect()}
+                  inputWord={this.state.inputWord}
+                  onRestart={this.onClickRestart}
+                />
               )}
             </>
           </div>
