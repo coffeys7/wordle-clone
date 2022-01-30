@@ -1,6 +1,6 @@
 import React from 'react';
 import Word from '@utilities/Word';
-import { get, isNil, includes } from 'lodash'
+import { get, isNil } from 'lodash'
 import success from '@images/success.gif';
 import fail from '@images/fail.gif';
 class Wordle extends React.Component {
@@ -161,11 +161,25 @@ class Wordle extends React.Component {
     let currentLetter = get(this.state.words, `[${i}][${j}]`, null);
     if (isNil(currentLetter)) return 'empty';
 
-    if (includes(this.state.inputWord, currentLetter)) {
+    let pattern = new RegExp(currentLetter, 'g');
+    let occurrencesInInputWord = (this.state.inputWord.match(pattern) || []).length;
+    let substring = this.state.words[i].substring(0, j + 1);
+    
+    let occurrencesInSubstring = (substring.match(pattern) || []).length;
+
+    if (occurrencesInInputWord > 0) {
       if (this.state.inputWord[j] === currentLetter) {
         return 'exact';
       } else {
-        return 'in-word';
+        if (occurrencesInSubstring > 1) {
+          if (occurrencesInSubstring <= occurrencesInInputWord) {
+            return 'in-word';
+          } else {
+            return 'missing';
+          }
+        } else { 
+          return 'in-word';
+        }
       }
     } else {
       return 'missing';
