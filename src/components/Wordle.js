@@ -13,6 +13,7 @@ class Wordle extends React.Component {
       currentWordCount: 0,
       words: [],
       currentWord: '',
+      currentWordInvalid: false
     };
 
     this.onClickBegin = this.onClickBegin.bind(this);
@@ -32,6 +33,8 @@ class Wordle extends React.Component {
     this.checkCompletion = this.checkCompletion.bind(this);
     this.isCurrentWordCorrect = this.isCurrentWordCorrect.bind(this);
     this.onInputKeyPress = this.onInputKeyPress.bind(this);
+    this.checkWordValidity = this.checkWordValidity.bind(this);
+    this.classNameForRow = this.classNameForRow.bind(this);
   }
 
   onClickRestart() {
@@ -41,7 +44,8 @@ class Wordle extends React.Component {
       inputWord: '',
       currentWordCount: 0,
       words: [],
-      currentWord: ''
+      currentWord: '',
+      currentWordInvalid: false
     })
   }
 
@@ -91,6 +95,15 @@ class Wordle extends React.Component {
     }[keyCode];
   }
 
+  checkWordValidity() {
+    let isValid = Word.isInWordList(this.state.currentWord);
+    this.setState({
+      currentWordInvalid: !isValid
+    });
+
+    return isValid;
+  }
+
   getWordSize() {
     return this.state.inputWord.length;
   }
@@ -105,6 +118,7 @@ class Wordle extends React.Component {
 
   onPressBackspace() {
     if (this.state.currentWord.length > 0) {
+      this.setState({ currentWordInvalid: false });
       this.setCurrentWord(this.state.currentWord.slice(0, -1));
       this.updateWords();
     }
@@ -120,6 +134,8 @@ class Wordle extends React.Component {
   }
 
   onPressEnter() {
+    if (!this.checkWordValidity()) return;
+
     this.incrementCurrentWordCount();
 
     if (this.checkCompletion()) {
@@ -186,10 +202,21 @@ class Wordle extends React.Component {
     }
   }
 
+  classNameForRow(i) {
+    if (this.state.currentWordCount > i) {
+      return 'submitted';
+    } else if (this.state.currentWordCount === i) {
+      if (this.state.currentWordInvalid) {
+        return 'invalid';
+      }
+    }
+    return '';
+  }
+
   createGrid() {
     return Array(6).fill(null).map((_, i) => {
       return (
-        <div className={`wordle-grid-row ${this.state.currentWordCount > i ? 'submitted' : ''}`} key={`row-${i}`}>
+        <div className={`wordle-grid-row ${this.classNameForRow(i)}`} key={`row-${i}`}>
           {
             Array(this.getWordSize()).fill(null).map((_, j) => {
               return (
