@@ -1,4 +1,13 @@
 import React from 'react';
+import words from '@data/words';
+
+const randNumber = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const arrySample = (arry) => {
+  return arry[randNumber(0, arry.length)];
+}
 
 class Wordle extends React.Component {
   constructor(props) {
@@ -21,6 +30,8 @@ class Wordle extends React.Component {
     this.incrementCurrentWordCount = this.incrementCurrentWordCount.bind(this);
     this.updateWords = this.updateWords.bind(this);
     this.isCurrentWordFull = this.isCurrentWordFull.bind(this);
+    this.onClickSurpriseMe = this.onClickSurpriseMe.bind(this);
+    this.generateRandomWord = this.generateRandomWord.bind(this);
   }
 
   onClickBegin() {
@@ -32,6 +43,18 @@ class Wordle extends React.Component {
   setCurrentWord(newWord) {
     this.setState({
       currentWord: newWord
+    });
+  }
+
+  generateRandomWord() {
+    let wordSize = randNumber(4, 9);
+    return arrySample(words[wordSize.toString()]);
+  }
+
+  onClickSurpriseMe() {
+    this.setState({
+      inputWord: this.generateRandomWord(),
+      isStarted: true
     });
   }
 
@@ -154,7 +177,10 @@ class Wordle extends React.Component {
               value={this.state.inputWord} 
               onChange={ event => this.setInputWord(event.target.value) } 
             />
-            <button onClick={this.onClickBegin} style={{display: 'block', margin: '0 auto'}}>Begin</button>
+            <div className="menu-buttons">
+              <button onClick={this.onClickBegin}>Begin</button>
+              <button onClick={this.onClickSurpriseMe}>Surprise Me</button>
+            </div>
           </>
         )}
         {this.state.isStarted && (
