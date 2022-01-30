@@ -1,9 +1,9 @@
 import React from 'react';
 import Word from '@utilities/Word';
-import WordleGrid from '@components/wordle_grid/WordleGrid';
+import Wordle from '@components/wordle/Wordle';
 import Summary from '@components/Summary';
 import { get, isNil } from 'lodash'
-class Wordle extends React.Component {
+class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -216,17 +216,17 @@ class Wordle extends React.Component {
   createGrid() {
     return Array(6).fill(null).map((_, i) => {
       return (
-        <WordleGrid.Row className={this.classNameForRow(i)} key={`row-${i}`}>
+        <Wordle.Row className={this.classNameForRow(i)} key={`row-${i}`}>
           {
             Array(this.getWordSize()).fill(null).map((_, j) => {
               return (
-                <WordleGrid.Cell className={this.classNameForBox(i, j)} key={`box-${j}`}>
+                <Wordle.Cell className={this.classNameForBox(i, j)} key={`box-${j}`}>
                   {get(this.state.words, `[${i}][${j}]`, 'x')}
-                </WordleGrid.Cell>
+                </Wordle.Cell>
               );
             })
           }
-        </WordleGrid.Row>
+        </Wordle.Row>
       );
     });
   }
@@ -255,9 +255,9 @@ class Wordle extends React.Component {
             <p>
               <a href="#!" onClick={this.onClickRestart}>Restart</a>
             </p>
-            <WordleGrid.Grid>
+            <Wordle.Grid>
               {this.createGrid()}
-            </WordleGrid.Grid>
+            </Wordle.Grid>
             <>
               {this.state.isCompleted && (
                 <Summary
@@ -274,4 +274,4 @@ class Wordle extends React.Component {
   }
 }
 
-export default Wordle;
+export default Game;
