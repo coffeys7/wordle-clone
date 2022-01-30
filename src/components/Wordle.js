@@ -1,14 +1,6 @@
 import React from 'react';
-import words from '@data/words';
-
-const randNumber = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-const arrySample = (arry) => {
-  return arry[randNumber(0, arry.length)];
-}
-
+import Word from '@utilities/Word';
+import { get, isNil } from 'lodash'
 class Wordle extends React.Component {
   constructor(props) {
     super(props);
@@ -23,7 +15,6 @@ class Wordle extends React.Component {
     this.onClickBegin = this.onClickBegin.bind(this);
     this.setCurrentWord = this.setCurrentWord.bind(this);
     this.getWordSize = this.getWordSize.bind(this);
-    this.getLetters = this.getLetters.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
     this.createGrid = this.createGrid.bind(this);
     this.setInputWord = this.setInputWord.bind(this);
@@ -31,7 +22,17 @@ class Wordle extends React.Component {
     this.updateWords = this.updateWords.bind(this);
     this.isCurrentWordFull = this.isCurrentWordFull.bind(this);
     this.onClickSurpriseMe = this.onClickSurpriseMe.bind(this);
-    this.generateRandomWord = this.generateRandomWord.bind(this);
+    this.onClickRestart = this.onClickRestart.bind(this);
+  }
+
+  onClickRestart() {
+    this.setState({
+      isStarted: false,
+      inputWord: '',
+      currentWordCount: 0,
+      words: [],
+      currentWord: ''
+    })
   }
 
   onClickBegin() {
@@ -46,14 +47,9 @@ class Wordle extends React.Component {
     });
   }
 
-  generateRandomWord() {
-    let wordSize = randNumber(4, 9);
-    return arrySample(words[wordSize.toString()]);
-  }
-
   onClickSurpriseMe() {
     this.setState({
-      inputWord: this.generateRandomWord(),
+      inputWord: Word.generateRandomWord(),
       isStarted: true
     });
   }
@@ -93,10 +89,6 @@ class Wordle extends React.Component {
     document.addEventListener("keydown", this.onKeyPress);
   }
 
-  getLetters() {
-    return 'abcdefghijklmnopqrstuvwxyz';
-  }
-
   isCurrentWordFull() {
     return this.state.currentWord.length === this.getWordSize();
   }
@@ -118,7 +110,7 @@ class Wordle extends React.Component {
         this.setCurrentWord('');
       }
     } else {
-      if (this.getLetters().indexOf(e.key) > -1) {
+      if (Word.isInAlphabet(e.key)) {
         this.setCurrentWord(`${this.state.currentWord}${e.key}`);
         this.updateWords();
       }
@@ -126,26 +118,19 @@ class Wordle extends React.Component {
   }
 
   classNameForBox(i, j) {
-    if (this.state.currentWordCount <= i) {
+    if (this.state.currentWordCount <= i) return '';
+
+    let currentLetter = get(this.state.words, `[${i}][${j}]`, null);
+    if (isNil(currentLetter)) {
       return '';
     } else {
-      let word = this.state.words[i];
-      let letter = word[j];
-      if (letter === undefined || letter === null) {
-        return '';
-      } else {
-        let index = this.state.inputWord.indexOf(letter);
-        if (index > -1) {
-          return (index === j) ? 'exact' : 'in-word';
-        } else {
-          return 'missing';
-        }
-      }
+      let indexInWord = this.state.inputWord.indexOf(currentLetter);
+      if (indexInWord > -1) return (indexInWord === j) ? 'exact' : 'in-word';
+      else return 'missing';
     }
   }
 
   createGrid() {
-    console.log('Creating or re-creating grid...');
     return Array(6).fill(null).map((_, i) => {
       return (
         <div className={`wordle-grid-row ${this.state.currentWordCount > i ? 'submitted' : ''}`} key={`row-${i}`}>
@@ -186,6 +171,7 @@ class Wordle extends React.Component {
         {this.state.isStarted && (
           <div>
             <p style={{marginBottom: '1rem'}}>We have begun</p>
+            <a href="#!" onClick={this.onClickRestart}>Restart</a>
             <div className="wordle-grid">
               {this.createGrid()}
             </div>
