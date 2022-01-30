@@ -2,7 +2,7 @@ import { sample, random, toString, includes } from 'lodash';
 import words from '@data/words';
 
 const generateRandomWord = () => {
-  let wordSize = random(4, 9);
+  let wordSize = random(4, 6);
   return sample(words[toString(wordSize)])
 };
 

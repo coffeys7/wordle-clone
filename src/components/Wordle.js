@@ -1,12 +1,13 @@
 import React from 'react';
 import Word from '@utilities/Word';
-import { get, isNil } from 'lodash'
+import { get, isNil, includes } from 'lodash'
 class Wordle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       inputWord: '',
       isStarted: false,
+      isCompleted: false,
       currentWordCount: 0,
       words: [],
       currentWord: '',
@@ -23,11 +24,18 @@ class Wordle extends React.Component {
     this.isCurrentWordFull = this.isCurrentWordFull.bind(this);
     this.onClickSurpriseMe = this.onClickSurpriseMe.bind(this);
     this.onClickRestart = this.onClickRestart.bind(this);
+    this.onPressBackspace = this.onPressBackspace.bind(this);
+    this.onPressEnter = this.onPressEnter.bind(this);
+    this.onPressLetter = this.onPressLetter.bind(this);
+    this.checkCompletion = this.checkCompletion.bind(this);
+    this.isCurrentWordCorrect = this.isCurrentWordCorrect.bind(this);
+    this.onInputKeyPress = this.onInputKeyPress.bind(this);
   }
 
   onClickRestart() {
     this.setState({
       isStarted: false,
+      isCompleted: false,
       inputWord: '',
       currentWordCount: 0,
       words: [],
@@ -93,28 +101,58 @@ class Wordle extends React.Component {
     return this.state.currentWord.length === this.getWordSize();
   }
 
+  onPressBackspace() {
+    if (this.state.currentWord.length > 0) {
+      this.setCurrentWord(this.state.currentWord.slice(0, -1));
+      this.updateWords();
+    }
+  }
+
+  isCurrentWordCorrect() {
+    return this.state.currentWord === this.state.inputWord;
+  }
+
+  checkCompletion() {
+    return this.isCurrentWordCorrect() || 
+      (this.state.words.length === 6 && this.isCurrentWordFull());
+  }
+
+  onPressEnter() {
+    this.incrementCurrentWordCount();
+
+    if (this.checkCompletion()) {
+      this.setState({
+        isCompleted: true
+      });
+    } else {
+      this.setCurrentWord('');
+    }
+  }
+
+  onPressLetter(letter) {
+    this.setCurrentWord(`${this.state.currentWord}${letter}`);
+    this.updateWords();
+  }
+
   onKeyPress(e) {
     if (!this.state.isStarted) return;
+    if (this.state.isCompleted) return;
     
-    if (e.keyCode === this.keyCode('BACKSPACE')) {
-      if (this.state.currentWord.length > 0) {
-        this.setCurrentWord(this.state.currentWord.slice(0, -1));
-        this.updateWords();
-        return;
-      }
-    }
+    if (e.keyCode === this.keyCode('BACKSPACE'))
+      this.onPressBackspace();
 
     if (this.isCurrentWordFull()) {
-      if (e.keyCode === this.keyCode('ENTER')) {
-        this.incrementCurrentWordCount();
-        this.setCurrentWord('');
-      }
+      if (e.keyCode === this.keyCode('ENTER'))
+        this.onPressEnter();
     } else {
-      if (Word.isInAlphabet(e.key)) {
-        this.setCurrentWord(`${this.state.currentWord}${e.key}`);
-        this.updateWords();
-      }
+      if (Word.isInAlphabet(e.key))
+        this.onPressLetter(e.key);
     }
+  }
+
+  onInputKeyPress(e) {
+    if (e.keyCode === this.keyCode('ENTER')) 
+      this.onClickBegin();
   }
 
   classNameForBox(i, j) {
@@ -124,9 +162,15 @@ class Wordle extends React.Component {
     if (isNil(currentLetter)) {
       return '';
     } else {
-      let indexInWord = this.state.inputWord.indexOf(currentLetter);
-      if (indexInWord > -1) return (indexInWord === j) ? 'exact' : 'in-word';
-      else return 'missing';
+      if (includes(this.state.inputWord, currentLetter)) {
+        if (this.state.inputWord[j] === currentLetter) {
+          return 'exact';
+        } else {
+          return 'in-word';
+        }
+      } else {
+        return 'missing';
+      }
     }
   }
 
@@ -155,12 +199,13 @@ class Wordle extends React.Component {
       <div className="Wordle">
         {!this.state.isStarted && (
           <>
-            <p>Enter a word to begin</p>
+            <p className="text">Enter a word to begin</p>
             <input 
               type="text"
               className="wordle-input"
               value={this.state.inputWord} 
-              onChange={ event => this.setInputWord(event.target.value) } 
+              onChange={ event => this.setInputWord(event.target.value) }
+              onKeyDown={this.onInputKeyPress}
             />
             <div className="menu-buttons">
               <button onClick={this.onClickBegin}>Begin</button>
@@ -170,11 +215,32 @@ class Wordle extends React.Component {
         )}
         {this.state.isStarted && (
           <div>
-            <p style={{marginBottom: '1rem'}}>We have begun</p>
-            <a href="#!" onClick={this.onClickRestart}>Restart</a>
+            <p className="text" style={{marginBottom: '1rem'}}>We have begun</p>
+            <p>
+              <a href="#!" onClick={this.onClickRestart}>Restart</a>
+            </p>
             <div className="wordle-grid">
               {this.createGrid()}
             </div>
+            <>
+              {this.state.isCompleted && (
+                <div className="summary">
+                  {this.isCurrentWordCorrect() && (
+                    <>
+                      <p className="text">Congratulations! You guessed the word!</p>
+                      <button onClick={this.onClickRestart}>Play Again</button>
+                    </>
+                  )}
+                  {!this.isCurrentWordCorrect() && (
+                    <>
+                      <p className="text">Uh oh! You suck!</p>
+                      <p className="text">The word was <strong>{this.state.inputWord}</strong></p>
+                      <button onClick={this.onClickRestart}>Play Again</button>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
           </div>
         )}
       </div>
