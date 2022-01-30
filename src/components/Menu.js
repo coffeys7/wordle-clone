@@ -5,20 +5,19 @@ import KeyCodes from '@utilities/KeyCodes';
 export default function Menu(props) {
   const [inputWord, setInputWord] = useState('');
 
-  const onBegin = () => {
-    props.onBegin(inputWord);
+  const onBegin = (word) => {
+    console.log('onBegin', 'inputWord', word);
+    props.onBegin(word);
   }
 
   const onInputKeyPress = (e) => {
     if (e.keyCode === KeyCodes.ENTER) {
-      setInputWord(e.target.value);
-      onBegin()
+      onBegin(e.target.value);
     }
   }
 
   const onClickSurpriseMe = () => {
-    setInputWord(Word.generateRandomWord());
-    onBegin();
+    onBegin(Word.generateRandomWord());
   }
 
   return (
@@ -32,8 +31,8 @@ export default function Menu(props) {
         onKeyDown={onInputKeyPress}
       />
       <div className="menu-buttons">
-        <button onClick={onBegin}>Begin</button>
-        <button onClick={onClickSurpriseMe}>Surprise Me</button>
+        <button disabled={inputWord.length < 4} onClick={() => onBegin(inputWord)}>Begin</button>
+        <button onClick={() => onClickSurpriseMe()}>Surprise Me</button>
       </div>
     </>
   );
