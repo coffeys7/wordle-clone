@@ -1,6 +1,8 @@
 import React from 'react';
 import Word from '@utilities/Word';
 import { get, isNil, includes } from 'lodash'
+import success from '@images/success.gif';
+import fail from '@images/fail.gif';
 class Wordle extends React.Component {
   constructor(props) {
     super(props);
@@ -222,13 +224,19 @@ class Wordle extends React.Component {
                 <div className="summary">
                   {this.isCurrentWordCorrect() && (
                     <>
-                      <p className="text">Congratulations! You guessed the word!</p>
+                      <p className="text">Woot!</p>
+                      <p>
+                       <img src={success} width="300" />
+                      </p>
                       <button onClick={this.onClickRestart}>Play Again</button>
                     </>
                   )}
                   {!this.isCurrentWordCorrect() && (
                     <>
                       <p className="text">Uh oh! You suck!</p>
+                      <p>
+                       <img src={fail} width="300" />
+                      </p>
                       <p className="text">The word was <strong style={{ textTransform: 'uppercase' }}>{this.state.inputWord}</strong></p>
                       <button onClick={this.onClickRestart}>Play Again</button>
                     </>
