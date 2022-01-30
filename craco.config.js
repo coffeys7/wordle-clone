@@ -8,12 +8,5 @@ module.exports = {
       '@stylesheets': path.resolve(__dirname, 'src/stylesheets'),
       '@data': path.resolve(__dirname, 'src/data')
     }
-  },
-  style: {
-    postcss: {
-      plugins: [
-        require("tailwindcss")("./tailwind.config.js")
-      ]
-    }
   }
 };
