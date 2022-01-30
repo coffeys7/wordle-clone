@@ -14,10 +14,15 @@ const isInAlphabet = (letter) => {
   return includes(alphabet(), letter);
 };
 
+const isInWordList = (word) => {
+  return includes(words[toString(word.length)], word);
+};
+
 const exports =  {
   generateRandomWord,
   alphabet,
-  isInAlphabet
+  isInAlphabet,
+  isInWordList
 };
 
 export default exports;

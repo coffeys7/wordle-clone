@@ -85,6 +85,11 @@ a {
       }
     }
   }
+  &.invalid {
+    .wordle-letter-box {
+      border: 1px solid red;
+    }
+  }
   .wordle-letter-box {
     &.empty {
       .box-container {
