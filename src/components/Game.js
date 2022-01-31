@@ -68,13 +68,13 @@ class Game extends React.Component {
     });
   }
 
-  updateKeyUsageMap(key, indicator) {
+  updateKeyUsageMap(subMap, callback) {
     this.setState({
       keyUsageMap: {
         ...this.state.keyUsageMap,
-        [key]: indicator
+        ...subMap
       }
-    });
+    }, callback);
   }
 
   incrementCurrentWordCount() {
@@ -132,24 +132,25 @@ class Game extends React.Component {
 
   onPressEnter() {
     if (!this.checkWordValidity()) return;
+    
+    this.updateKeyUsageMap(
+      this.state.currentWord.split('').reduce((map, letter, index) => {
+        return {
+          ...map,
+          [letter]: this.determineOccurrenceForLetter(letter, this.state.currentWordCount, index)
+        }
+      }, {})
+    , () => {
+      this.incrementCurrentWordCount();
 
-    // update key usage map for the current word
-    this.state.currentWord.split('').forEach((letter, index) => {
-      this.updateKeyUsageMap(
-        letter,
-        this.determineOccurrenceForLetter(letter, this.state.currentWordCount, index)
-      );
-    });
-
-    this.incrementCurrentWordCount();
-
-    if (this.checkCompletion()) {
-      this.setState({
-        isCompleted: true
-      });
-    } else {
-      this.setCurrentWord('');
-    }
+      if (this.checkCompletion()) {
+        this.setState({
+          isCompleted: true
+        });
+      } else {
+        this.setCurrentWord('');
+      }
+    });    
   }
 
   onPressLetter(letter) {
