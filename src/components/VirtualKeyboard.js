@@ -1,3 +1,5 @@
+import { includes } from 'lodash';
+
 export default function VirtualKeyboard(props) {
   const keys = [
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -20,7 +22,7 @@ export default function VirtualKeyboard(props) {
           {
             row.map((key, j) => {
               return (
-                <div className="keyboard-key" key={`kb-key-${j}`} onClick={() => onKey(key)}>
+                <div className={`keyboard-key ${includes(['⌫', '⏎'], key) ? 'special' : ''}`} key={`kb-key-${j}`} onClick={() => onKey(key)}>
                   {key}
                 </div>
               );

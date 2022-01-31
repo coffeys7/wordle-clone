@@ -169,6 +169,10 @@ a {
       height: 4em;
       border-radius: 0.2em;
       text-transform: uppercase;
+      &.special {
+        width: 4em;
+        background-color: #487eb0;
+      }
     }
   }
 }
@@ -187,6 +191,9 @@ a {
       .keyboard-key {
         width: 30px;
         height: 45px;
+        &.special {
+          width: 60px;
+        }
       }
     }
   }
