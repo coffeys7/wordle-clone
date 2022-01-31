@@ -1,9 +1,8 @@
-import { sample, random, toString, includes } from 'lodash';
+import { sample, toString, includes } from 'lodash';
 import words from '@data/words';
 
 const generateRandomWord = () => {
-  let wordSize = random(4, 6);
-  return sample(words[toString(wordSize)])
+  return sample(words['5'])
 };
 
 const alphabet = () => {
