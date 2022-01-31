@@ -16,7 +16,8 @@ class Game extends React.Component {
       currentWordCount: 0,
       words: [],
       currentWord: '',
-      currentWordInvalid: false
+      currentWordInvalid: false,
+      keyUsageMap: {}
     };
 
     this.onBegin = this.onBegin.bind(this);
@@ -37,6 +38,8 @@ class Game extends React.Component {
     this.classNameForRow = this.classNameForRow.bind(this);
     this.onVirtualKeyboardKeyPress = this.onVirtualKeyboardKeyPress.bind(this);
     this.handleValidKeyPress = this.handleValidKeyPress.bind(this);
+    this.updateKeyUsageMap = this.updateKeyUsageMap.bind(this);
+    this.determineOccurrenceForLetter = this.determineOccurrenceForLetter.bind(this);
   }
 
   onClickRestart() {
@@ -47,7 +50,8 @@ class Game extends React.Component {
       currentWordCount: 0,
       words: [],
       currentWord: '',
-      currentWordInvalid: false
+      currentWordInvalid: false,
+      keyUsageMap: {}
     })
   }
 
@@ -61,6 +65,15 @@ class Game extends React.Component {
   setCurrentWord(newWord) {
     this.setState({
       currentWord: newWord
+    });
+  }
+
+  updateKeyUsageMap(key, indicator) {
+    this.setState({
+      keyUsageMap: {
+        ...this.state.keyUsageMap,
+        [key]: indicator
+      }
     });
   }
 
@@ -120,6 +133,14 @@ class Game extends React.Component {
   onPressEnter() {
     if (!this.checkWordValidity()) return;
 
+    // update key usage map for the current word
+    this.state.currentWord.split('').forEach((letter, index) => {
+      this.updateKeyUsageMap(
+        letter,
+        this.determineOccurrenceForLetter(letter, this.state.currentWordCount, index)
+      );
+    });
+
     this.incrementCurrentWordCount();
 
     if (this.checkCompletion()) {
@@ -166,6 +187,28 @@ class Game extends React.Component {
     } 
   }
 
+  determineOccurrenceForLetter(letter, i, j) {
+    if (isNil(letter)) return 'empty';
+
+    let pattern = new RegExp(letter, 'g');
+    let occurrencesInInputWord = (this.state.inputWord.match(pattern) || []).length;
+    let substring = this.state.words[i].substring(0, j + 1);
+    let occurrencesInSubstring = (substring.match(pattern) || []).length;
+
+    if (occurrencesInInputWord > 0) {
+      if (this.state.inputWord[j] === letter) {
+        return 'exact';
+      } else {
+        if (occurrencesInSubstring > 1) {
+          return (occurrencesInSubstring <= occurrencesInInputWord) ? 'in-word' : 'missing';
+        } else { 
+          return 'in-word';
+        }
+      }
+    }
+    return 'missing';
+  }
+
   classNameForBox(i, j) {
     let currentLetter = get(this.state.words, `[${i}][${j}]`, null);
     if (isNil(currentLetter)) return 'empty';
@@ -173,7 +216,6 @@ class Game extends React.Component {
     let pattern = new RegExp(currentLetter, 'g');
     let occurrencesInInputWord = (this.state.inputWord.match(pattern) || []).length;
     let substring = this.state.words[i].substring(0, j + 1);
-    
     let occurrencesInSubstring = (substring.match(pattern) || []).length;
 
     if (occurrencesInInputWord > 0) {
@@ -181,18 +223,13 @@ class Game extends React.Component {
         return 'exact';
       } else {
         if (occurrencesInSubstring > 1) {
-          if (occurrencesInSubstring <= occurrencesInInputWord) {
-            return 'in-word';
-          } else {
-            return 'missing';
-          }
+          return (occurrencesInSubstring <= occurrencesInInputWord) ? 'in-word' : 'missing';
         } else { 
           return 'in-word';
         }
       }
-    } else {
-      return 'missing';
     }
+    return 'missing';
   }
 
   classNameForRow(i) {
@@ -241,7 +278,7 @@ class Game extends React.Component {
               {this.createGrid()}
             </Wordle.Grid>
             {!this.state.isCompleted && (
-              <VirtualKeyboard onKey={this.onVirtualKeyboardKeyPress} />
+              <VirtualKeyboard usageMap={this.state.keyUsageMap} onKey={this.onVirtualKeyboardKeyPress} />
             )}
             <>
               {this.state.isCompleted && (

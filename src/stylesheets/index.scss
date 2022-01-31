@@ -173,6 +173,15 @@ a {
         width: 4em;
         background-color: #487eb0;
       }
+      &.exact {
+        background-color: #16a085;
+      }
+      &.in-word {
+        background-color: #e67e22;
+      }
+      &.missing {
+        background-color: #222f3e;
+      }
     }
   }
 }

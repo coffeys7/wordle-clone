@@ -6,7 +6,7 @@ const generateRandomWord = () => {
 };
 
 const alphabet = () => {
-  return 'abcdefghijklmnopqrstuvwxyz';
+  return 'abcdefghijklmnopqrstuvwxyz'.split('');
 };
 
 const isInAlphabet = (letter) => {
