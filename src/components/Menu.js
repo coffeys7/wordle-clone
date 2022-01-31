@@ -6,11 +6,11 @@ export default function Menu(props) {
   const [inputWord, setInputWord] = useState('');
 
   const onBegin = (word) => {
-    if (!isInputWordValidWord()) {
+    if (!isInputWordValidWord(word)) {
       alert('Not a valid word');
       return;
     }
-    if (isInputWordValidSize()) 
+    if (isInputWordValidSize(word)) 
       props.onBegin(word);
   }
 
@@ -26,12 +26,12 @@ export default function Menu(props) {
     onBegin(Word.generateRandomWord());
   }
 
-  const isInputWordValidSize = () => {
-    return inputWord.length >= 4 && inputWord.length <= 7;
+  const isInputWordValidSize = (word) => {
+    return word.length >= 4 && word.length <= 7;
   }
 
-  const isInputWordValidWord = () => {
-    return Word.isInWordList(inputWord);
+  const isInputWordValidWord = (word) => {
+    return Word.isInWordList(word);
   }
 
   return (
@@ -47,7 +47,7 @@ export default function Menu(props) {
         onKeyDown={onInputKeyPress}
       />
       <div className="menu-buttons">
-        <button disabled={!isInputWordValidSize()} onClick={() => onBegin(inputWord)}>Begin</button>
+        <button disabled={!isInputWordValidSize(inputWord)} onClick={() => onBegin(inputWord)}>Begin</button>
         <button onClick={() => onClickSurpriseMe()}>Surprise Me</button>
       </div>
     </>
