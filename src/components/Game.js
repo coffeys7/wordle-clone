@@ -4,6 +4,7 @@ import KeyCodes from '@utilities/KeyCodes';
 import Wordle from '@components/wordle/Wordle';
 import Summary from '@components/Summary';
 import Menu from '@components/Menu';
+import VirtualKeyboard from '@components/VirtualKeyboard';
 import { get, isNil } from 'lodash'
 class Game extends React.Component {
   constructor(props) {
@@ -34,6 +35,8 @@ class Game extends React.Component {
     this.isCurrentWordCorrect = this.isCurrentWordCorrect.bind(this);
     this.checkWordValidity = this.checkWordValidity.bind(this);
     this.classNameForRow = this.classNameForRow.bind(this);
+    this.onVirtualKeyboardKeyPress = this.onVirtualKeyboardKeyPress.bind(this);
+    this.handleValidKeyPress = this.handleValidKeyPress.bind(this);
   }
 
   onClickRestart() {
@@ -67,9 +70,9 @@ class Game extends React.Component {
     });
   }
 
-  updateWords() {
+  updateWords(newCurrentWord) {
     let words = this.state.words;
-    words[this.state.currentWordCount] = this.state.currentWord;
+    words[this.state.currentWordCount] = newCurrentWord;
     this.setState({
       words: words
     });
@@ -99,8 +102,9 @@ class Game extends React.Component {
   onPressBackspace() {
     if (this.state.currentWord.length > 0) {
       this.setState({ currentWordInvalid: false });
-      this.setCurrentWord(this.state.currentWord.slice(0, -1));
-      this.updateWords();
+      let newCurrentWord = this.state.currentWord.slice(0, -1); 
+      this.setCurrentWord(newCurrentWord);
+      this.updateWords(newCurrentWord);
     }
   }
 
@@ -128,24 +132,38 @@ class Game extends React.Component {
   }
 
   onPressLetter(letter) {
-    this.setCurrentWord(`${this.state.currentWord}${letter}`);
-    this.updateWords();
+    let newCurrentWord = `${this.state.currentWord}${letter}`; 
+    this.setCurrentWord(newCurrentWord);
+    this.updateWords(newCurrentWord);
+  }
+
+  handleValidKeyPress(key) {    
+    if (key === 'backspace') {
+      this.onPressBackspace();
+    } else if (this.isCurrentWordFull()) {
+      if (key === 'enter')
+        this.onPressEnter();
+    } else {
+      if (Word.isInAlphabet(key))
+        this.onPressLetter(key);
+    }
+  }
+
+  onVirtualKeyboardKeyPress(key) {
+    this.handleValidKeyPress(key);
   }
 
   onKeyPress(e) {
     if (!this.state.isStarted) return;
     if (this.state.isCompleted) return;
-    
-    if (e.keyCode === KeyCodes.BACKSPACE)
-      this.onPressBackspace();
 
-    if (this.isCurrentWordFull()) {
-      if (e.keyCode === KeyCodes.ENTER)
-        this.onPressEnter();
+    if (e.keyCode === KeyCodes.BACKSPACE) {
+      this.handleValidKeyPress('backspace');
+    } else if (e.keyCode === KeyCodes.ENTER) {
+      this.handleValidKeyPress('enter');
     } else {
-      if (Word.isInAlphabet(e.key))
-        this.onPressLetter(e.key);
-    }
+      this.handleValidKeyPress(e.key);
+    } 
   }
 
   classNameForBox(i, j) {
@@ -222,6 +240,9 @@ class Game extends React.Component {
             <Wordle.Grid>
               {this.createGrid()}
             </Wordle.Grid>
+            {!this.state.isCompleted && (
+              <VirtualKeyboard onKey={this.onVirtualKeyboardKeyPress} />
+            )}
             <>
               {this.state.isCompleted && (
                 <Summary
