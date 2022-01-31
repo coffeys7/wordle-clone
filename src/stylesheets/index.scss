@@ -129,5 +129,9 @@ a {
 
   button {
     margin: 0.5em;
+    &:disabled {
+      cursor: disabled;
+      background-color: #9fa1a354;
+    }
   }
 }

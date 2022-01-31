@@ -1,9 +1,11 @@
 import React from 'react';
 import Word from '@utilities/Word';
+import KeyCodes from '@utilities/KeyCodes';
+import Wordle from '@components/wordle/Wordle';
+import Summary from '@components/Summary';
+import Menu from '@components/Menu';
 import { get, isNil } from 'lodash'
-import success from '@images/success.gif';
-import fail from '@images/fail.gif';
-class Wordle extends React.Component {
+class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,32 +18,29 @@ class Wordle extends React.Component {
       currentWordInvalid: false
     };
 
-    this.onClickBegin = this.onClickBegin.bind(this);
+    this.onBegin = this.onBegin.bind(this);
     this.setCurrentWord = this.setCurrentWord.bind(this);
     this.getWordSize = this.getWordSize.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
     this.createGrid = this.createGrid.bind(this);
-    this.setInputWord = this.setInputWord.bind(this);
     this.incrementCurrentWordCount = this.incrementCurrentWordCount.bind(this);
     this.updateWords = this.updateWords.bind(this);
     this.isCurrentWordFull = this.isCurrentWordFull.bind(this);
-    this.onClickSurpriseMe = this.onClickSurpriseMe.bind(this);
     this.onClickRestart = this.onClickRestart.bind(this);
     this.onPressBackspace = this.onPressBackspace.bind(this);
     this.onPressEnter = this.onPressEnter.bind(this);
     this.onPressLetter = this.onPressLetter.bind(this);
     this.checkCompletion = this.checkCompletion.bind(this);
     this.isCurrentWordCorrect = this.isCurrentWordCorrect.bind(this);
-    this.onInputKeyPress = this.onInputKeyPress.bind(this);
     this.checkWordValidity = this.checkWordValidity.bind(this);
     this.classNameForRow = this.classNameForRow.bind(this);
   }
 
   onClickRestart() {
     this.setState({
+      inputWord: '',
       isStarted: false,
       isCompleted: false,
-      inputWord: '',
       currentWordCount: 0,
       words: [],
       currentWord: '',
@@ -49,22 +48,16 @@ class Wordle extends React.Component {
     })
   }
 
-  onClickBegin() {
+  onBegin(inputWord) {
     this.setState({
-      isStarted: true
+      isStarted: true,
+      inputWord: inputWord
     });
   }
 
   setCurrentWord(newWord) {
     this.setState({
       currentWord: newWord
-    });
-  }
-
-  onClickSurpriseMe() {
-    this.setState({
-      inputWord: Word.generateRandomWord(),
-      isStarted: true
     });
   }
 
@@ -80,19 +73,6 @@ class Wordle extends React.Component {
     this.setState({
       words: words
     });
-  }
-
-  setInputWord(word) {
-    this.setState({
-      inputWord: word
-    });
-  }
-
-  keyCode(keyCode) {
-    return {
-      ENTER: 13,
-      BACKSPACE: 8,
-    }[keyCode];
   }
 
   checkWordValidity() {
@@ -156,21 +136,16 @@ class Wordle extends React.Component {
     if (!this.state.isStarted) return;
     if (this.state.isCompleted) return;
     
-    if (e.keyCode === this.keyCode('BACKSPACE'))
+    if (e.keyCode === KeyCodes.BACKSPACE)
       this.onPressBackspace();
 
     if (this.isCurrentWordFull()) {
-      if (e.keyCode === this.keyCode('ENTER'))
+      if (e.keyCode === KeyCodes.ENTER)
         this.onPressEnter();
     } else {
       if (Word.isInAlphabet(e.key))
         this.onPressLetter(e.key);
     }
-  }
-
-  onInputKeyPress(e) {
-    if (e.keyCode === this.keyCode('ENTER')) 
-      this.onClickBegin();
   }
 
   classNameForBox(i, j) {
@@ -216,19 +191,17 @@ class Wordle extends React.Component {
   createGrid() {
     return Array(6).fill(null).map((_, i) => {
       return (
-        <div className={`wordle-grid-row ${this.classNameForRow(i)}`} key={`row-${i}`}>
+        <Wordle.Row className={this.classNameForRow(i)} key={`row-${i}`}>
           {
             Array(this.getWordSize()).fill(null).map((_, j) => {
               return (
-                <div className={`wordle-letter-box ${this.classNameForBox(i, j)}`} key={`box-${j}`}>
-                  <div className="box-container">
-                    {(this.state.words[i] || [])[j] || 'x'}
-                  </div>
-                </div>
+                <Wordle.Cell className={this.classNameForBox(i, j)} key={`box-${j}`}>
+                  {get(this.state.words, `[${i}][${j}]`, 'x')}
+                </Wordle.Cell>
               );
             })
           }
-        </div>
+        </Wordle.Row>
       );
     });
   }
@@ -237,52 +210,25 @@ class Wordle extends React.Component {
     return (
       <div className="Wordle">
         {!this.state.isStarted && (
-          <>
-            <p className="text">Enter a word to begin</p>
-            <input 
-              type="text"
-              className="wordle-input"
-              value={this.state.inputWord} 
-              onChange={ event => this.setInputWord(event.target.value) }
-              onKeyDown={this.onInputKeyPress}
-            />
-            <div className="menu-buttons">
-              <button onClick={this.onClickBegin}>Begin</button>
-              <button onClick={this.onClickSurpriseMe}>Surprise Me</button>
-            </div>
-          </>
+          <Menu 
+            onBegin={this.onBegin}
+          />
         )}
         {this.state.isStarted && (
           <div>
             <p>
               <a href="#!" onClick={this.onClickRestart}>Restart</a>
             </p>
-            <div className="wordle-grid">
+            <Wordle.Grid>
               {this.createGrid()}
-            </div>
+            </Wordle.Grid>
             <>
               {this.state.isCompleted && (
-                <div className="summary">
-                  {this.isCurrentWordCorrect() && (
-                    <>
-                      <p className="text">Woot!</p>
-                      <p>
-                       <img src={success} alt="Success" width="300" />
-                      </p>
-                      <button onClick={this.onClickRestart}>Play Again</button>
-                    </>
-                  )}
-                  {!this.isCurrentWordCorrect() && (
-                    <>
-                      <p className="text">Uh oh! You suck!</p>
-                      <p>
-                       <img src={fail} alt="Fail" width="300" />
-                      </p>
-                      <p className="text">The word was <strong style={{ textTransform: 'uppercase' }}>{this.state.inputWord}</strong></p>
-                      <button onClick={this.onClickRestart}>Play Again</button>
-                    </>
-                  )}
-                </div>
+                <Summary
+                  isSuccess={this.isCurrentWordCorrect()}
+                  inputWord={this.state.inputWord}
+                  onRestart={this.onClickRestart}
+                />
               )}
             </>
           </div>
@@ -292,4 +238,4 @@ class Wordle extends React.Component {
   }
 }
 
-export default Wordle;
+export default Game;
