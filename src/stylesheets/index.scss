@@ -46,7 +46,7 @@ body {
   text-transform: uppercase;
   outline: none;
   border-radius: 0.2em;
-  font-size: 30px;
+  font-size: 1.5em;
   &:focus {
     outline: none;
     background-color: rgba(200, 214, 229, 1.0);
@@ -74,7 +74,10 @@ a {
 }
 
 .wordle-grid-row {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.3em 0;
 }
 
 .wordle-grid-row {
@@ -109,16 +112,15 @@ a {
 }
 
 .wordle-letter-box {
-  display: inline-block;
-  width: 60px;
-  height: 60px;
+  width: 3em;
+  height: 3em;
   background-color: #576574;
-  margin: 5px;
+  margin: 0 0.2em;
   border: 1px solid #c8d6e5;
 }
 
 .wordle-letter-box .box-container {
-  font-size: 28px;
+  font-size: 75%;
   width: 100%;
   height: 100%;
   display: flex;
