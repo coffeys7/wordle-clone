@@ -40,6 +40,7 @@ class Game extends React.Component {
     this.handleValidKeyPress = this.handleValidKeyPress.bind(this);
     this.updateKeyUsageMap = this.updateKeyUsageMap.bind(this);
     this.determineOccurrenceForLetter = this.determineOccurrenceForLetter.bind(this);
+    this.updateKeyUsageMapOnEnter = this.updateKeyUsageMapOnEnter.bind(this);
   }
 
   onClickRestart() {
@@ -132,12 +133,23 @@ class Game extends React.Component {
 
   onPressEnter() {
     if (!this.checkWordValidity()) return;
-    
+
+    this.updateKeyUsageMapOnEnter();
+  }
+
+  updateKeyUsageMapOnEnter() {
     this.updateKeyUsageMap(
       this.state.currentWord.split('').reduce((map, letter, index) => {
+        let newOccurrence = this.determineOccurrenceForLetter(letter, this.state.currentWordCount, index);
+        let existingOccurrence = map[letter];
+        if (existingOccurrence === 'exact') {
+          newOccurrence = 'exact';
+        } else if (existingOccurrence === 'in-word') {
+          newOccurrence = (newOccurrence === 'exact') ? 'exact' : 'in-word';
+        }
         return {
           ...map,
-          [letter]: this.determineOccurrenceForLetter(letter, this.state.currentWordCount, index)
+          [letter]: newOccurrence
         }
       }, {})
     , () => {
@@ -150,7 +162,7 @@ class Game extends React.Component {
       } else {
         this.setCurrentWord('');
       }
-    });    
+    });
   }
 
   onPressLetter(letter) {
@@ -177,7 +189,12 @@ class Game extends React.Component {
 
   onKeyPress(e) {
     if (!this.state.isStarted) return;
-    if (this.state.isCompleted) return;
+    if (this.state.isCompleted) {
+      if (e.keyCode === KeyCodes.ENTER) {
+        this.onClickRestart();
+      }
+      return;
+    }
 
     if (e.keyCode === KeyCodes.BACKSPACE) {
       this.handleValidKeyPress('backspace');
@@ -201,7 +218,11 @@ class Game extends React.Component {
         return 'exact';
       } else {
         if (occurrencesInSubstring > 1) {
-          return (occurrencesInSubstring <= occurrencesInInputWord) ? 'in-word' : 'missing';
+          if (occurrencesInSubstring <= occurrencesInInputWord) {
+            return 'in-word';
+          } else {
+            return 'missing';
+          }
         } else { 
           return 'in-word';
         }
